@@ -1,0 +1,170 @@
+openapi: 3.1.0
+info:
+  title: Los Primos Restobar Backend API
+  version: 0.2.0
+  description: |
+    Contrato OpenAPI vivo del backend.
+    Esta versión adopta autenticación FE↔BE por API Key.
+    La comunicación es API REST y el runtime objetivo es NestJS + Fastify.
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
+tags:
+  - name: Auth
+    description: Authentication and authorization endpoints
+
+paths:
+  /auth/health:
+    get:
+      tags: [Auth]
+      summary: Health check de autenticación
+      operationId: authHealth
+      responses:
+        '200':
+          description: Auth module healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Contexto de identidad autenticada por API Key
+      description: |
+        Endpoint protegido por API Key + sesión interna server-side.
+        La respuesta NO devuelve JWT, bearer token, refresh token ni identificador de sesión.
+      operationId: authMe
+      security:
+        - apiKeyAuth: []
+      responses:
+        '200':
+          description: Authenticated identity context (tokenless)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+        '401':
+          description: Missing/invalid/inactive API key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthenticated:
+                  value:
+                    statusCode: 401
+                    code: AUTH_UNAUTHENTICATED
+                    message: Authentication required using X-API-Key
+        '403':
+          description: Valid API key without required role intersection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    code: AUTH_FORBIDDEN
+                    message: Forbidden by RBAC policy
+
+  /auth/admin-only:
+    get:
+      tags: [Auth]
+      summary: Endpoint protegido para permiso administrativo
+      description: Requiere rol `ADMIN` en la sesión interna activa.
+      operationId: authAdminOnly
+      security:
+        - apiKeyAuth: []
+      responses:
+        '200':
+          description: Access granted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          description: Missing/invalid/inactive API key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthenticated:
+                  value:
+                    statusCode: 401
+                    code: AUTH_UNAUTHENTICATED
+                    message: Authentication required using X-API-Key
+        '403':
+          description: Valid API key without required permission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    code: AUTH_FORBIDDEN
+                    message: Forbidden by RBAC policy
+
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    MeResponse:
+      type: object
+      required: [principalId, roles, authMethod]
+      properties:
+        principalId:
+          type: string
+          description: Identificador interno del principal autenticado.
+        roles:
+          type: array
+          items:
+            type: string
+        authMethod:
+          type: string
+          enum: [api-key]
+      description: |
+        Contexto autenticado para FE bajo contrato API Key-only.
+        No incluye tokens ni session identifiers.
+
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 401
+        code:
+          type: string
+          enum:
+            - AUTH_UNAUTHENTICATED
+            - AUTH_FORBIDDEN
+            - STATE_INVALID
+            - STOCK_CONFLICT
+            - CONCURRENCY_CONFLICT
+            - CLOSURE_BLOCKED
+        message:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+        correlation_id:
+          type: string
+          description: Optional in current implementation; recommended for critical flows.
