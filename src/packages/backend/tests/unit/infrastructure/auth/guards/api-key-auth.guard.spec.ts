@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type Mocked } from 'vitest';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ApiKeyAuthGuard } from '../../../../../src/infrastructure/auth/guards/api-key-auth.guard';
@@ -10,7 +10,7 @@ import {
 
 describe('ApiKeyAuthGuard', () => {
   let guard: ApiKeyAuthGuard;
-  let validateApiKeyPortMock: vi.Mocked<ValidateApiKeyPort>;
+  let validateApiKeyPortMock: Mocked<ValidateApiKeyPort>;
   let reflectorMock: Pick<Reflector, 'getAllAndOverride'>;
 
   beforeEach(() => {

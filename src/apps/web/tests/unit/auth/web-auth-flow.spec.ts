@@ -4,6 +4,7 @@ import {
   API_KEY_HEADER_NAME,
   createWebApiClient,
   type HttpRequest,
+  type HttpResponse,
   type HttpTransport
 } from '../../../src/auth/web-api-client';
 import { createWebAuthSessionState } from '../../../src/auth/web-auth-flow';
@@ -11,13 +12,13 @@ import { createWebAuthSessionState } from '../../../src/auth/web-auth-flow';
 class TransportSpy implements HttpTransport {
   public readonly requests: HttpRequest[] = [];
 
-  public async request(request: HttpRequest): Promise<{ status: number; data: string }> {
+  public async request<TData>(request: HttpRequest): Promise<HttpResponse<TData>> {
     this.requests.push(request);
 
     return {
       status: 200,
-      data: 'ok'
-    };
+      data: 'ok' as TData
+    } satisfies HttpResponse<TData>;
   }
 }
 

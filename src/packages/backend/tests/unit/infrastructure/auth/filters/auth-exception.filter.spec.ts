@@ -3,7 +3,7 @@ import {
   ForbiddenException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type Mocked } from 'vitest';
 import { AuditEventPort } from '../../../../../src/application/auth/ports/audit-event.port';
 import { AuthExceptionFilter } from '../../../../../src/infrastructure/auth/filters/auth-exception.filter';
 
@@ -33,7 +33,7 @@ const buildArgumentsHost = (
 };
 
 describe('AuthExceptionFilter', () => {
-  let auditEventPortMock: vi.Mocked<AuditEventPort>;
+  let auditEventPortMock: Mocked<AuditEventPort>;
   let filter: AuthExceptionFilter;
   let response: MockHttpResponse;
 
