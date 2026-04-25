@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import {
   ValidateApiKeyPort,
 } from '../../../application/auth/ports/validate-api-key.port';
@@ -6,10 +6,14 @@ import {
   ApiKeyAuthenticatedContext,
   toApiKeyAuthenticatedContext,
 } from './api-key-auth-context.mapper';
+import { IDENTITY_ACCESS_TOKENS } from '../../../identity-access/identity-access.tokens';
 
 @Injectable()
 export class ApiKeyAuthGuard implements CanActivate {
-  constructor(private readonly validateApiKeyPort: ValidateApiKeyPort) {}
+  constructor(
+    @Inject(IDENTITY_ACCESS_TOKENS.validateApiKeyPort)
+    private readonly validateApiKeyPort: ValidateApiKeyPort,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{

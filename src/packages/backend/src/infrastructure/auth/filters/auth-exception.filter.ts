@@ -3,6 +3,7 @@ import {
   Catch,
   ExceptionFilter,
   ForbiddenException,
+  Inject,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuditEventPort } from '../../../application/auth/ports/audit-event.port';
@@ -11,6 +12,7 @@ import {
   buildAuthErrorResponsePayload,
   resolveAuthExceptionDescriptor,
 } from '../constants/auth-error.constants';
+import { IDENTITY_ACCESS_TOKENS } from '../../../identity-access/identity-access.tokens';
 
 type HttpResponse = {
   status?(code: number): HttpResponse;
@@ -25,7 +27,10 @@ type HttpRequest = {
 
 @Catch(UnauthorizedException, ForbiddenException)
 export class AuthExceptionFilter implements ExceptionFilter {
-  constructor(private readonly auditEventPort: AuditEventPort) {}
+  constructor(
+    @Inject(IDENTITY_ACCESS_TOKENS.auditEventPort)
+    private readonly auditEventPort: AuditEventPort,
+  ) {}
 
   async catch(
     exception: UnauthorizedException | ForbiddenException,
