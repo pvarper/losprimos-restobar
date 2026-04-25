@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { ApiKeyAuthGuard } from '../../../../../src/infrastructure/auth/guards/api-key-auth.guard';
 import {
   ActiveApiKeyPayload,
@@ -10,12 +11,16 @@ import {
 describe('ApiKeyAuthGuard', () => {
   let guard: ApiKeyAuthGuard;
   let validateApiKeyPortMock: vi.Mocked<ValidateApiKeyPort>;
+  let reflectorMock: Pick<Reflector, 'getAllAndOverride'>;
 
   beforeEach(() => {
     validateApiKeyPortMock = {
       validate: vi.fn(),
     };
-    guard = new ApiKeyAuthGuard(validateApiKeyPortMock);
+    reflectorMock = {
+      getAllAndOverride: vi.fn().mockReturnValue(false),
+    };
+    guard = new ApiKeyAuthGuard(validateApiKeyPortMock, reflectorMock as Reflector);
   });
 
   const createMockContext = (headers: Record<string, string> = {}): ExecutionContext => {
@@ -23,8 +28,20 @@ describe('ApiKeyAuthGuard', () => {
       switchToHttp: () => ({
         getRequest: () => ({ headers }),
       }),
+      getHandler: () => undefined,
+      getClass: () => undefined,
     } as unknown as ExecutionContext;
   };
+
+  it('should bypass API Key validation for @Public routes', async () => {
+    const context = createMockContext({});
+    vi.mocked(reflectorMock.getAllAndOverride).mockReturnValueOnce(true);
+
+    const result = await guard.canActivate(context);
+
+    expect(result).toBe(true);
+    expect(validateApiKeyPortMock.validate).not.toHaveBeenCalled();
+  });
 
   it('should throw UnauthorizedException when X-API-Key header is missing', async () => {
     const context = createMockContext({});
@@ -83,6 +100,8 @@ describe('ApiKeyAuthGuard', () => {
       switchToHttp: () => ({
         getRequest: () => mockRequest,
       }),
+      getHandler: () => undefined,
+      getClass: () => undefined,
     } as unknown as ExecutionContext;
 
     const mockPayload: ActiveApiKeyPayload = {

@@ -11,6 +11,7 @@ import { ClockPort } from './application/ports/clock.port';
 import { InMemoryApiKeyValidatorAdapter } from './infrastructure/adapters/in-memory-api-key-validator.adapter';
 import { SessionRepositoryAdapter } from './infrastructure/adapters/session-repository.adapter';
 import { SystemClockAdapter } from './infrastructure/adapters/system-clock.adapter';
+import { AuthController } from './infrastructure/controllers/auth.controller';
 import { IdentityAccessController } from './infrastructure/controllers/identity-access.controller';
 import { InternalSession } from './domain/entities/internal-session.entity';
 import { IDENTITY_ACCESS_TOKENS } from './identity-access.tokens';
@@ -95,7 +96,7 @@ const identityAccessProviders: Provider[] = [
 ];
 
 @Module({
-  controllers: [IdentityAccessController],
+  controllers: [IdentityAccessController, AuthController],
   providers: identityAccessProviders,
   exports: [ApiKeyAuthGuard, InternalSessionGuard, RbacGuard, AuthExceptionFilter],
 })

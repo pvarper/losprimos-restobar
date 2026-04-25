@@ -5,7 +5,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { ResolveSessionUseCase } from '../../../identity-access/application/use-cases/resolve-session.use-case';
+import { PUBLIC_ROUTE_KEY } from '../decorators/public.decorator';
 import { IDENTITY_ACCESS_TOKENS } from '../../../identity-access/identity-access.tokens';
 
 type RequestWithHeaders = {
@@ -17,9 +19,20 @@ export class InternalSessionGuard implements CanActivate {
   constructor(
     @Inject(IDENTITY_ACCESS_TOKENS.resolveSessionUseCase)
     private readonly resolveSessionUseCase: ResolveSessionUseCase,
+    @Inject(Reflector)
+    private readonly reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(PUBLIC_ROUTE_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return true;
+    }
+
     const request = context.switchToHttp().getRequest<RequestWithHeaders>();
     const sessionHeader = request.headers['x-session-id'];
 
