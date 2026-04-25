@@ -29,6 +29,6 @@ export const resolveRbacMetadata = (reflector: Reflector, context: ExecutionCont
   };
 };
 
-export const hasAllRequiredRoles = (requiredRoles: string[], userRoles: string[]): boolean => {
-  return requiredRoles.every((requiredRole) => userRoles.includes(requiredRole));
+export const hasAnyRequiredRole = (requiredRoles: string[], userRoles: string[]): boolean => {
+  return requiredRoles.some((requiredRole) => userRoles.includes(requiredRole));
 };

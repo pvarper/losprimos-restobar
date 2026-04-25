@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { hasAllRequiredRoles, resolveRbacMetadata } from './rbac-metadata.helper';
+import { hasAnyRequiredRole, resolveRbacMetadata } from './rbac-metadata.helper';
 
 const FORBIDDEN_MESSAGE = 'Insufficient role permissions';
 
@@ -30,7 +30,7 @@ export class RbacGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<RequestWithUser>();
     const userRoles = request.user?.roles ?? [];
 
-    if (!hasAllRequiredRoles(requiredRoles, userRoles)) {
+    if (!hasAnyRequiredRole(requiredRoles, userRoles)) {
       throw new ForbiddenException(FORBIDDEN_MESSAGE);
     }
 

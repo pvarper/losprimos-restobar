@@ -55,12 +55,20 @@ describe('RbacGuard', () => {
     await expect(guard.canActivate(context)).resolves.toBe(true);
   });
 
-  it('roles intersection: should reject when user does not satisfy all required roles', async () => {
+  it('roles intersection: should reject when user has no required role', async () => {
+    const context = createExecutionContext(fixture.billingEndpoint, {
+      roles: ['mozo'],
+    });
+
+    await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+  });
+
+  it('roles intersection: should allow when user has at least one required role', async () => {
     const context = createExecutionContext(fixture.billingEndpoint, {
       roles: ['admin'],
     });
 
-    await expect(guard.canActivate(context)).rejects.toThrow(ForbiddenException);
+    await expect(guard.canActivate(context)).resolves.toBe(true);
   });
 
   it('roles intersection: should allow when user satisfies all required roles', async () => {
