@@ -1,25 +1,41 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { ResolveSessionUseCase } from '../../../../../src/identity-access/application/use-cases/resolve-session.use-case';
+import { ClockPort } from '../../../../../src/identity-access/application/ports/clock.port';
 import { SessionRepositoryAdapter } from '../../../../../src/identity-access/infrastructure/adapters/session-repository.adapter';
+
+class FixedClock implements ClockPort {
+  private currentDate: Date;
+
+  constructor(initialDate: Date) {
+    this.currentDate = initialDate;
+  }
+
+  now(): Date {
+    return this.currentDate;
+  }
+
+  set(date: Date): void {
+    this.currentDate = date;
+  }
+}
 
 describe('ResolveSessionUseCase', () => {
   let sessionRepository: SessionRepositoryAdapter;
+  let clock: FixedClock;
   let useCase: ResolveSessionUseCase;
 
   beforeEach(() => {
     sessionRepository = new SessionRepositoryAdapter();
-    useCase = new ResolveSessionUseCase(sessionRepository, 1_000);
+    clock = new FixedClock(new Date('2026-04-24T10:00:00.000Z'));
+    useCase = new ResolveSessionUseCase(sessionRepository, clock, 1_000);
   });
 
   it('should create an internal session when action is create', async () => {
-    const now = new Date('2026-04-24T10:00:00.000Z');
-
     const session = await useCase.execute({
       action: 'create',
       sessionId: 'session-1',
       userId: 'user-1',
       roleIds: ['admin'],
-      now,
     });
 
     expect(session).not.toBeNull();
@@ -28,52 +44,43 @@ describe('ResolveSessionUseCase', () => {
   });
 
   it('should return null when an existing session is expired', async () => {
-    const now = new Date('2026-04-24T10:00:00.000Z');
-
     await useCase.execute({
       action: 'create',
       sessionId: 'session-expired',
       userId: 'user-1',
       roleIds: ['mozo'],
-      now,
     });
+
+    clock.set(new Date('2026-04-24T10:00:01.100Z'));
 
     const expiredSession = await useCase.execute({
       action: 'resolve',
       sessionId: 'session-expired',
-      userId: 'user-1',
-      roleIds: ['mozo'],
-      now: new Date('2026-04-24T10:00:01.100Z'),
     });
 
     expect(expiredSession).toBeNull();
   });
 
   it('should revoke an active session and then deny resolve', async () => {
-    const now = new Date('2026-04-24T10:00:00.000Z');
-
     await useCase.execute({
       action: 'create',
       sessionId: 'session-revoked',
       userId: 'user-2',
       roleIds: ['cajero'],
-      now,
     });
+
+    clock.set(new Date('2026-04-24T10:00:00.200Z'));
 
     const revokedSession = await useCase.execute({
       action: 'revoke',
       sessionId: 'session-revoked',
-      userId: 'user-2',
-      roleIds: ['cajero'],
-      now: new Date('2026-04-24T10:00:00.200Z'),
     });
+
+    clock.set(new Date('2026-04-24T10:00:00.300Z'));
 
     const resolvedAfterRevoke = await useCase.execute({
       action: 'resolve',
       sessionId: 'session-revoked',
-      userId: 'user-2',
-      roleIds: ['cajero'],
-      now: new Date('2026-04-24T10:00:00.300Z'),
     });
 
     expect(revokedSession).not.toBeNull();
