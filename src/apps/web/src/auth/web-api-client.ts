@@ -1,10 +1,13 @@
 import type { WebAuthSessionState } from './web-auth-flow';
 
 export const API_KEY_HEADER_NAME = 'X-API-Key';
+const HTTP_METHOD_GET = 'GET';
 const MISSING_API_KEY_ERROR = 'No hay API Key configurada para consumir endpoints protegidos.';
 
+type HttpMethod = typeof HTTP_METHOD_GET;
+
 export interface HttpRequest {
-  method: 'GET';
+  method: HttpMethod;
   url: string;
   headers: Record<string, string>;
 }
@@ -29,9 +32,13 @@ export interface WebApiClient {
 }
 
 const createRequest = (url: string, headers: Record<string, string>): HttpRequest => ({
-  method: 'GET',
+  method: HTTP_METHOD_GET,
   url,
   headers
+});
+
+const buildProtectedHeaders = (apiKey: string): Record<string, string> => ({
+  [API_KEY_HEADER_NAME]: apiKey
 });
 
 export const createWebApiClient = (dependencies: WebApiClientDependencies): WebApiClient => {
@@ -49,11 +56,7 @@ export const createWebApiClient = (dependencies: WebApiClientDependencies): WebA
         throw new Error(MISSING_API_KEY_ERROR);
       }
 
-      return transport.request<TData>(
-        createRequest(url, {
-          [API_KEY_HEADER_NAME]: apiKey
-        })
-      );
+      return transport.request<TData>(createRequest(url, buildProtectedHeaders(apiKey)));
     }
   };
 };

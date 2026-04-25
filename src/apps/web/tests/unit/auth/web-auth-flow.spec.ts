@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { createWebApiClient, type HttpRequest, type HttpTransport } from '../../../src/auth/web-api-client';
+import {
+  API_KEY_HEADER_NAME,
+  createWebApiClient,
+  type HttpRequest,
+  type HttpTransport
+} from '../../../src/auth/web-api-client';
 import { createWebAuthSessionState } from '../../../src/auth/web-auth-flow';
 
 class TransportSpy implements HttpTransport {
@@ -39,7 +44,7 @@ describe('web auth flow', () => {
     await apiClient.getProtected('/api/v1/secure-resource');
 
     expect(transport.requests).toHaveLength(1);
-    expect(transport.requests[0]?.headers['X-API-Key']).toBe('lp-key-002');
+    expect(transport.requests[0]?.headers[API_KEY_HEADER_NAME]).toBe('lp-key-002');
   });
 
   it('no envía X-API-Key en llamadas públicas', async () => {
@@ -56,6 +61,6 @@ describe('web auth flow', () => {
     await apiClient.getPublic('/api/v1/public-resource');
 
     expect(transport.requests).toHaveLength(1);
-    expect(transport.requests[0]?.headers['X-API-Key']).toBeUndefined();
+    expect(transport.requests[0]?.headers[API_KEY_HEADER_NAME]).toBeUndefined();
   });
 });
