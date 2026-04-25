@@ -1,8 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import {
-  ActiveApiKeyPayload,
   ValidateApiKeyPort,
 } from '../../../application/auth/ports/validate-api-key.port';
+import {
+  ApiKeyAuthenticatedContext,
+  toApiKeyAuthenticatedContext,
+} from './api-key-auth-context.mapper';
 
 @Injectable()
 export class ApiKeyAuthGuard implements CanActivate {
@@ -11,11 +14,7 @@ export class ApiKeyAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<{
       headers: Record<string, string | string[] | undefined>;
-      user?: {
-        authMethod: 'api-key';
-        clientId: string;
-        roles: string[];
-      };
+      user?: ApiKeyAuthenticatedContext;
     }>();
     const apiKeyHeader = request.headers['x-api-key'];
 
@@ -32,20 +31,8 @@ export class ApiKeyAuthGuard implements CanActivate {
     }
 
     // Mapeo de contexto autenticado
-    request.user = this.toAuthenticatedUser(payload);
+    request.user = toApiKeyAuthenticatedContext(payload);
 
     return true;
-  }
-
-  private toAuthenticatedUser(payload: ActiveApiKeyPayload): {
-    authMethod: 'api-key';
-    clientId: string;
-    roles: string[];
-  } {
-    return {
-      authMethod: 'api-key',
-      clientId: payload.clientId,
-      roles: payload.roles,
-    };
   }
 }
