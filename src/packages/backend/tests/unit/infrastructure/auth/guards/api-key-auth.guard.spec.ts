@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { ApiKeyAuthGuard } from '../../../../../src/infrastructure/auth/guards/api-key-auth.guard';
-import { ValidateApiKeyPort } from '../../../../../src/application/auth/ports/validate-api-key.port';
+import {
+  ActiveApiKeyPayload,
+  InactiveApiKeyPayload,
+  ValidateApiKeyPort,
+} from '../../../../../src/application/auth/ports/validate-api-key.port';
 
 describe('ApiKeyAuthGuard', () => {
   let guard: ApiKeyAuthGuard;
@@ -57,11 +61,12 @@ describe('ApiKeyAuthGuard', () => {
 
   it('should throw UnauthorizedException when API Key exists but is inactive', async () => {
     const context = createMockContext({ 'x-api-key': 'inactive-key' });
-    validateApiKeyPortMock.validate.mockResolvedValue({
+    const inactivePayload: InactiveApiKeyPayload = {
       clientId: 'internal-app',
       roles: ['admin'],
-      isActive: false,
-    } as unknown as Awaited<ReturnType<ValidateApiKeyPort['validate']>>);
+      status: 'inactive',
+    };
+    validateApiKeyPortMock.validate.mockResolvedValue(inactivePayload);
 
     await expect(guard.canActivate(context)).rejects.toThrow(UnauthorizedException);
   });
@@ -80,7 +85,11 @@ describe('ApiKeyAuthGuard', () => {
       }),
     } as unknown as ExecutionContext;
 
-    const mockPayload = { clientId: 'internal-app', roles: ['admin'] };
+    const mockPayload: ActiveApiKeyPayload = {
+      clientId: 'internal-app',
+      roles: ['admin'],
+      status: 'active',
+    };
     validateApiKeyPortMock.validate.mockResolvedValue(mockPayload);
 
     const result = await guard.canActivate(context);
