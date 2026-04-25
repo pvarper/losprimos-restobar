@@ -6,22 +6,19 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuditEventPort } from '../../../application/auth/ports/audit-event.port';
+import {
+  AuthErrorResponsePayload,
+  buildAuthErrorResponsePayload,
+  resolveAuthExceptionDescriptor,
+} from '../constants/auth-error.constants';
 
 type HttpResponse = {
   status(code: number): HttpResponse;
-  json(payload: AuthErrorPayload): void;
+  json(payload: AuthErrorResponsePayload): void;
 };
 
 type HttpRequest = {
   url?: string;
-};
-
-type AuthErrorPayload = {
-  statusCode: 401 | 403;
-  code: 'AUTH_UNAUTHENTICATED' | 'AUTH_FORBIDDEN';
-  message: string;
-  path: string;
-  timestamp: string;
 };
 
 @Catch(UnauthorizedException, ForbiddenException)
@@ -36,27 +33,20 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const request = http.getRequest<HttpRequest>();
     const response = http.getResponse<HttpResponse>();
     const path = request.url ?? '';
-
-    const isUnauthorized = exception instanceof UnauthorizedException;
-    const statusCode = isUnauthorized ? 401 : 403;
-    const canonicalCode = isUnauthorized ? 'AUTH_UNAUTHENTICATED' : 'AUTH_FORBIDDEN';
-    const eventType = isUnauthorized ? 'AUTHN_DENIED' : 'AUTHZ_DENIED';
+    const { statusCode, canonicalCode, auditEventType } =
+      resolveAuthExceptionDescriptor(exception);
     const message = exception.message;
 
     await this.auditEventPort.record({
-      type: eventType,
+      type: auditEventType,
       statusCode,
       canonicalCode,
       path,
       reason: message,
     });
 
-    response.status(statusCode).json({
-      statusCode,
-      code: canonicalCode,
-      message,
-      path,
-      timestamp: new Date().toISOString(),
-    });
+    response
+      .status(statusCode)
+      .json(buildAuthErrorResponsePayload(statusCode, canonicalCode, message, path));
   }
 }
