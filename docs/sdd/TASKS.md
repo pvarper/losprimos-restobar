@@ -101,7 +101,7 @@ Nota: la implementación debe enlazar evidencia de pruebas por feature contra lo
 - [x] **Fase 6 — Slice contrato/documentación (TDD):** RED e2e (`auth-contract.e2e.spec.ts`) validando endpoints públicos/protegidos y ausencia de token en respuesta, GREEN actualización de `backend-openapi.yaml` + `auth-and-consumption.md`, REFACTOR de ejemplos/terminología API Key-only.
 - [x] **Fase 7 — Slice web auth (TDD):** RED tests web del flujo de autenticación por API Key (ingreso/configuración de credencial de consumo y guardado en estado de sesión de la app), GREEN implementación de pantalla/flujo en `src/apps/web/` para consumir endpoints públicos/protegidos, REFACTOR de estados/mensajes UX.
 - [x] **Fase 8 — Slice web manejo de errores canónicos (TDD):** RED tests web para respuestas `401/403` desde endpoints protegidos, GREEN manejo explícito en UI (mensaje visible + acción de recuperación/reintento según caso), REFACTOR de mapeo de errores FE↔BE.
-- [ ] **Fase 9 — Slice e2e full flow UI→API→respuesta visible (TDD):** RED e2e full-stack en `src/apps/web/` validando navegación/acción UI, llamada a API protegida con `X-API-Key` y rendering de respuesta/estado visible para usuario final, GREEN implementación mínima para pasar, REFACTOR de estabilidad y datos de prueba.
+- [x] **Fase 9 — Slice e2e full flow UI→API→respuesta visible (TDD):** RED e2e full-stack en `src/apps/web/` validando navegación/acción UI, llamada a API protegida con `X-API-Key` y rendering de respuesta/estado visible para usuario final, GREEN implementación mínima para pasar, REFACTOR de estabilidad y datos de prueba.
 
 ### DoD
 - [ ] Cumple criterios de issue #1.
