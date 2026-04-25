@@ -13,8 +13,10 @@ import {
 } from '../constants/auth-error.constants';
 
 type HttpResponse = {
-  status(code: number): HttpResponse;
+  status?(code: number): HttpResponse;
+  code?(code: number): HttpResponse;
   json(payload: AuthErrorResponsePayload): void;
+  send?(payload: AuthErrorResponsePayload): void;
 };
 
 type HttpRequest = {
@@ -45,8 +47,15 @@ export class AuthExceptionFilter implements ExceptionFilter {
       reason: message,
     });
 
-    response
-      .status(statusCode)
-      .json(buildAuthErrorResponsePayload(statusCode, canonicalCode, message, path));
+    const payload = buildAuthErrorResponsePayload(statusCode, canonicalCode, message, path);
+
+    const withStatus = response.status?.(statusCode) ?? response.code?.(statusCode);
+
+    if (withStatus?.json) {
+      withStatus.json(payload);
+      return;
+    }
+
+    response.send?.(payload);
   }
 }

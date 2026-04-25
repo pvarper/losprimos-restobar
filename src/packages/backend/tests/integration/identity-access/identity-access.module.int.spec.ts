@@ -1,20 +1,21 @@
-import { INestApplication } from '@nestjs/common';
+import { NestFastifyApplication, FastifyAdapter } from '@nestjs/platform-fastify';
 import { Test, TestingModule } from '@nestjs/testing';
 import { describe, beforeEach, afterEach, expect, it } from 'vitest';
 import { AppModule } from '../../../src/app.module';
 import { configureApp } from '../../../src/main';
 
 describe('IdentityAccess module integration (global wiring)', () => {
-  let app: INestApplication;
+  let app: NestFastifyApplication;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
     configureApp(app);
     await app.init();
+    await app.getHttpAdapter().getInstance().ready();
   });
 
   afterEach(async () => {
