@@ -26,4 +26,6 @@ async function bootstrap(): Promise<void> {
   await app.listen(3000, '0.0.0.0');
 }
 
-void bootstrap();
+if (require.main === module) {
+  void bootstrap();
+}

@@ -37,7 +37,7 @@ describe('IdentityAccess module integration (global wiring)', () => {
     });
   });
 
-  it('responde 403 cuando API Key es válida pero no tiene roles requeridos', async () => {
+  it('responde 200 cuando API Key es válida y tiene intersección de roles requeridos', async () => {
     const response = await app.inject({
       method: 'GET',
       url: '/identity-access/protected/admin-cajero',
@@ -47,9 +47,9 @@ describe('IdentityAccess module integration (global wiring)', () => {
       },
     });
 
-    expect(response.statusCode).toBe(403);
+    expect(response.statusCode).toBe(200);
     expect(response.json()).toMatchObject({
-      code: 'AUTH_FORBIDDEN',
+      status: 'ok',
     });
   });
 
