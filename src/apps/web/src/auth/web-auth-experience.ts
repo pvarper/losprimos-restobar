@@ -10,6 +10,7 @@ const GENERIC_ERROR_MESSAGE = 'No pudimos completar la operación. Reintentá en
 
 type WebAuthExperienceScreen = 'auth-form' | 'protected-result';
 type WebAuthExperienceStatus = 'idle' | 'success' | 'error';
+const PROTECTED_RESULT_SCREEN: WebAuthExperienceScreen = 'protected-result';
 
 export interface WebAuthExperienceVisibleState {
   currentScreen: WebAuthExperienceScreen;
@@ -50,8 +51,31 @@ const serializePayload = (payload: unknown): string => {
     return payload;
   }
 
-  return JSON.stringify(payload);
+  try {
+    return JSON.stringify(payload);
+  } catch {
+    return String(payload);
+  }
 };
+
+const createErrorVisibleState = (
+  message: string,
+  suggestedAction: WebAuthUiSuggestedAction,
+): WebAuthExperienceVisibleState => ({
+  currentScreen: PROTECTED_RESULT_SCREEN,
+  status: 'error',
+  message,
+  payload: null,
+  suggestedAction,
+});
+
+const createSuccessVisibleState = (payload: unknown): WebAuthExperienceVisibleState => ({
+  currentScreen: PROTECTED_RESULT_SCREEN,
+  status: 'success',
+  message: SUCCESS_MESSAGE,
+  payload: serializePayload(payload),
+  suggestedAction: null,
+});
 
 export const createWebAuthExperience = (
   dependencies: WebAuthExperienceDependencies,
@@ -75,7 +99,7 @@ export const createWebAuthExperience = (
     async submitProtectedRequest(url: string): Promise<void> {
       uiState.visible = {
         ...uiState.visible,
-        currentScreen: 'protected-result',
+        currentScreen: PROTECTED_RESULT_SCREEN,
       };
 
       sessionState.saveApiKey(uiState.apiKeyInput);
@@ -85,32 +109,20 @@ export const createWebAuthExperience = (
         const presenterState = presenter.getState();
 
         if (presenterState.status === 'error') {
-          uiState.visible = {
-            currentScreen: 'protected-result',
-            status: 'error',
-            message: presenterState.errorMessage,
-            payload: null,
-            suggestedAction: presenterState.suggestedAction,
-          };
+          uiState.visible = createErrorVisibleState(
+            presenterState.errorMessage ?? GENERIC_ERROR_MESSAGE,
+            presenterState.suggestedAction,
+          );
 
           return;
         }
 
-        uiState.visible = {
-          currentScreen: 'protected-result',
-          status: 'success',
-          message: SUCCESS_MESSAGE,
-          payload: serializePayload(response.data),
-          suggestedAction: null,
-        };
+        uiState.visible = createSuccessVisibleState(response.data);
       } catch {
-        uiState.visible = {
-          currentScreen: 'protected-result',
-          status: 'error',
-          message: GENERIC_ERROR_MESSAGE,
-          payload: null,
-          suggestedAction: 'reconfigure_api_key',
-        };
+        uiState.visible = createErrorVisibleState(
+          GENERIC_ERROR_MESSAGE,
+          'reconfigure_api_key',
+        );
       }
     },
 
