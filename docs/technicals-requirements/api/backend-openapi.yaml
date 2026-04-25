@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Los Primos Restobar Backend API
-  version: 0.2.0
+  version: 0.3.0
   description: |
     Contrato OpenAPI vivo del backend.
     Esta versión adopta autenticación FE↔BE por API Key.
@@ -37,7 +37,7 @@ paths:
       tags: [Auth]
       summary: Contexto de identidad autenticada por API Key
       description: |
-        Endpoint protegido por API Key + sesión interna server-side.
+        Endpoint protegido por API Key.
         La respuesta NO devuelve JWT, bearer token, refresh token ni identificador de sesión.
       operationId: authMe
       security:
@@ -49,6 +49,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeResponse'
+              examples:
+                apiKeyOnly:
+                  value:
+                    principalId: internal-admin-cajero
+                    roles: [admin, cajero]
+                    authMethod: api-key
         '401':
           description: Missing/invalid/inactive API key
           content:
@@ -63,50 +69,6 @@ paths:
                     message: Authentication required using X-API-Key
         '403':
           description: Valid API key without required role intersection
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                forbidden:
-                  value:
-                    statusCode: 403
-                    code: AUTH_FORBIDDEN
-                    message: Forbidden by RBAC policy
-
-  /auth/admin-only:
-    get:
-      tags: [Auth]
-      summary: Endpoint protegido para permiso administrativo
-      description: Requiere rol `ADMIN` en la sesión interna activa.
-      operationId: authAdminOnly
-      security:
-        - apiKeyAuth: []
-      responses:
-        '200':
-          description: Access granted
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  ok:
-                    type: boolean
-                    example: true
-        '401':
-          description: Missing/invalid/inactive API key
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                unauthenticated:
-                  value:
-                    statusCode: 401
-                    code: AUTH_UNAUTHENTICATED
-                    message: Authentication required using X-API-Key
-        '403':
-          description: Valid API key without required permission
           content:
             application/json:
               schema:

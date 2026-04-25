@@ -13,7 +13,7 @@
 - **Reglas clave asociadas:**
   - Cada request protegida debe enviar API Key válida.
   - La API Key puede activarse/desactivarse/rotarse por gestión administrativa.
-  - Si la sesión interna está expirada/revocada, la operación protegida se rechaza con 401.
+  - Si la sesión interna server-side está expirada/revocada, la operación protegida se rechaza con 401.
   - Endpoint público explícito: `/api/v1/auth/health` (bypass por `@Public()`).
   - Endpoints protegidos usan deny-by-default RBAC si no tienen metadata explícita.
   - `/api/v1/auth/me` devuelve contexto de identidad sin token (sin JWT/Bearer/refresh/sessionId).
@@ -51,11 +51,23 @@
 | Caso | Endpoint | Resultado |
 |---|---|---|
 | Público sin API Key | `GET /api/v1/auth/health` | `200` |
-| Protegido sin API Key | `GET /api/v1/auth/me` o `GET /api/v1/auth/admin-only` | `401 AUTH_UNAUTHENTICATED` |
-| API Key válida + sesión activa + rol faltante | `GET /api/v1/auth/admin-only` | `403 AUTH_FORBIDDEN` |
-| API Key válida + sesión expirada/revocada | endpoints protegidos | `401 AUTH_UNAUTHENTICATED` |
-| API Key válida + sesión activa + rol requerido | endpoint protegido con roles requeridos | `200` |
+| Protegido sin API Key | `GET /api/v1/auth/me` | `401 AUTH_UNAUTHENTICATED` |
+| API Key válida + contexto interno no autorizado por RBAC | endpoint protegido con roles requeridos | `403 AUTH_FORBIDDEN` |
+| API Key válida + sesión interna expirada/revocada | endpoints protegidos | `401 AUTH_UNAUTHENTICATED` |
+| API Key válida + contexto autorizado por RBAC | endpoint protegido con roles requeridos | `200` |
 - **Códigos adicionales de contrato general (dominio):** `409`, `422` con codes semánticos definidos en SPEC/DESIGN.
+
+### Respuesta tokenless esperada (`GET /api/v1/auth/me`)
+
+```json
+{
+  "principalId": "internal-admin-cajero",
+  "roles": ["admin", "cajero"],
+  "authMethod": "api-key"
+}
+```
+
+Regla contractual: la respuesta no debe incluir `token`, `accessToken`, `sessionId` ni cabeceras de sesión/bearer para el cliente.
 
 ### Fuente de verdad
 - [`DESIGN.md`](../../sdd/DESIGN.md) → §7 (Convenciones de API), §9 (códigos canónicos), §11 (seguridad/autorización).
