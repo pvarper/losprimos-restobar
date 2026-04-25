@@ -29,7 +29,10 @@ interface WebApiClientDependencies {
 export interface WebApiClient {
   getPublic<TData>(url: string): Promise<HttpResponse<TData>>;
   getProtected<TData>(url: string): Promise<HttpResponse<TData>>;
+  subscribeToResponses(listener: WebApiResponseListener): () => void;
 }
+
+export type WebApiResponseListener = (response: HttpResponse<unknown>) => void;
 
 const createRequest = (url: string, headers: Record<string, string>): HttpRequest => ({
   method: HTTP_METHOD_GET,
@@ -43,10 +46,24 @@ const buildProtectedHeaders = (apiKey: string): Record<string, string> => ({
 
 export const createWebApiClient = (dependencies: WebApiClientDependencies): WebApiClient => {
   const { transport, sessionState } = dependencies;
+  const responseListeners: WebApiResponseListener[] = [];
+
+  const notifyResponseListeners = (response: HttpResponse<unknown>): void => {
+    responseListeners.forEach((listener) => {
+      listener(response);
+    });
+  };
+
+  const requestAndNotify = async <TData>(request: HttpRequest): Promise<HttpResponse<TData>> => {
+    const response = await transport.request<TData>(request);
+    notifyResponseListeners(response);
+
+    return response;
+  };
 
   return {
     async getPublic<TData>(url: string): Promise<HttpResponse<TData>> {
-      return transport.request<TData>(createRequest(url, {}));
+      return requestAndNotify<TData>(createRequest(url, {}));
     },
 
     async getProtected<TData>(url: string): Promise<HttpResponse<TData>> {
@@ -56,7 +73,19 @@ export const createWebApiClient = (dependencies: WebApiClientDependencies): WebA
         throw new Error(MISSING_API_KEY_ERROR);
       }
 
-      return transport.request<TData>(createRequest(url, buildProtectedHeaders(apiKey)));
-    }
+      return requestAndNotify<TData>(createRequest(url, buildProtectedHeaders(apiKey)));
+    },
+
+    subscribeToResponses(listener: WebApiResponseListener): () => void {
+      responseListeners.push(listener);
+
+      return (): void => {
+        const index = responseListeners.indexOf(listener);
+
+        if (index >= 0) {
+          responseListeners.splice(index, 1);
+        }
+      };
+    },
   };
 };
