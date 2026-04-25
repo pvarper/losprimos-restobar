@@ -31,8 +31,17 @@ Para pasar al siguiente feature:
 
 ## 4) Estándar de ingeniería (obligatorio)
 
-- **TDD estricto**: Red -> Green -> Refactor.
-- **Arquitectura hexagonal** en backend (Ports & Adapters).
+- **TDD estricto**: Red -> Green -> Refactor. Cobertura obligatoria.
+- **Framework de Pruebas**: Usar obligatoriamente `vitest`.
+- **TypeScript Estricto**: Prohibido el uso de `any`. Todo parámetro y retorno debe tener un tipado fuerte y explícito.
+- **Arquitectura hexagonal** en backend (Ports & Adapters):
+  - El dominio puro no puede depender de frameworks (prohibido usar `@Injectable` o decoradores de TypeORM/Prisma en Entidades de Dominio).
+  - Los controladores y casos de uso se comunican mediante DTOs. Los casos de uso manipulan Entidades puras.
+  - Toda dependencia de infraestructura (ej. base de datos) se define mediante Interfaces (Puertos) en la capa de Dominio, y se implementa en Adaptadores.
+- **Clean Code, SOLID y DRY**:
+  - Respetar Single Responsibility Principle (SRP) y Dependency Inversion (DIP).
+  - Cero *magic numbers* o *magic strings*. Usar constantes centralizadas.
+  - Todo código repetido (Tipos, Interfaces, DTOs compartidos y códigos de error canónicos) DEBE ir en `src/packages/shared-utils/`.
 - Contrato API y OpenAPI actualizados por feature.
 - Cumplir Definition of API Done antes de cerrar endpoint/feature.
 
@@ -63,6 +72,14 @@ src/
           types/
           url/
 ```
+
+**Reglas estrictas de Monorepo y Diseño Modular:**
+- **Fronteras Inquebrantables:** 
+  - `apps/web` (UI) NO debe contener lógica de negocio crítica ni acceso directo a DB.
+  - `packages/data-access` (Prisma/DB) NO debe exponer reglas de negocio ni depender de UI.
+  - `packages/shared-utils` NO debe depender de los módulos de dominio (`backend` o `data-access`) para mantener su reusabilidad universal.
+- **Prohibido:** Crear código o módulos sueltos fuera de estas carpetas objetivo. Cada nueva funcionalidad MVP debe acoplarse respetando este scaffolding.
+- **Excepciones:** Si una implementación exige romper esta estructura, el agente DEBE pausar y pedir autorización explícita al usuario justificando el trade-off técnico.
 
 Referencias:
 - `docs/technicals-requirements/architecture.md`
