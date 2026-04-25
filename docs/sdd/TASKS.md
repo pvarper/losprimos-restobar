@@ -93,7 +93,7 @@ Nota: la implementación debe enlazar evidencia de pruebas por feature contra lo
 - Fuera de alcance: JWT/OAuth/refresh token para cliente FE.
 
 ### Tasks
-- [ ] **Fase 1 — Slice API Key (TDD):** RED `src/packages/backend/tests/unit/**/api-key-auth.guard.spec.ts` (falta/inválida/inactiva => 401, sin Bearer/JWT), GREEN `api-key-auth.guard.ts` + contrato de validación, REFACTOR de mapeo de contexto autenticado.
+- [x] **Fase 1 — Slice API Key (TDD):** RED `src/packages/backend/tests/unit/**/api-key-auth.guard.spec.ts` (falta/inválida/inactiva => 401, sin Bearer/JWT), GREEN `api-key-auth.guard.ts` + contrato de validación, REFACTOR de mapeo de contexto autenticado.
 - [ ] **Fase 2 — Slice sesión interna (TDD):** RED `src/packages/backend/tests/unit/**/resolve-session.use-case.spec.ts` (crear/expirar/revocar), GREEN `internal-session.entity.ts` + `session-repository.port.ts` + `session-repository.adapter.ts` + `resolve-session.use-case.ts`, REFACTOR de TTL/reloj y nomenclatura.
 - [ ] **Fase 3 — Slice RBAC multirol (TDD):** RED `src/packages/backend/tests/unit/**/rbac.guard.spec.ts` (deny-by-default, `@Public()`, intersección de roles), GREEN `public.decorator.ts` + `roles.decorator.ts` + `rbac.guard.ts`, REFACTOR helper de metadata/roles requeridos.
 - [ ] **Fase 4 — Slice errores/auditoría (TDD):** RED `src/packages/backend/tests/unit/**/auth-exception.filter.spec.ts` + tests de auditoría separada 401/403, GREEN `auth-exception.filter.ts` + `audit-event.port.ts` + adapter inicial, REFACTOR de códigos canónicos y payload de error.
