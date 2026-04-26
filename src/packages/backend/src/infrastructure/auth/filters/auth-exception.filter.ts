@@ -6,7 +6,10 @@ import {
   Inject,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuditEventPort } from '../../../application/auth/ports/audit-event.port';
+import {
+  AuditEvent,
+  AuditEventPort,
+} from '../../../application/auth/ports/audit-event.port';
 import {
   AuthErrorResponsePayload,
   buildAuthErrorResponsePayload,
@@ -23,6 +26,18 @@ type HttpResponse = {
 
 type HttpRequest = {
   url?: string;
+};
+
+type ForbiddenPayloadDetails = {
+  message?: string;
+  required?: string[];
+  actual?: string[];
+  requiredRoles?: string[];
+  actualRoles?: string[];
+};
+
+const isStringArray = (value: unknown): value is string[] => {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
 };
 
 @Catch(UnauthorizedException, ForbiddenException)
@@ -48,21 +63,29 @@ export class AuthExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof ForbiddenException && exception.message.startsWith('{')) {
       try {
-        const parsed = JSON.parse(exception.message);
-        reason = parsed.message;
-        requiredRoles = parsed.required;
-        actualRoles = parsed.actual;
+        const parsed = JSON.parse(exception.message) as ForbiddenPayloadDetails;
+        reason = parsed.message ?? reason;
+        requiredRoles = isStringArray(parsed.requiredRoles)
+          ? parsed.requiredRoles
+          : isStringArray(parsed.required)
+            ? parsed.required
+            : undefined;
+        actualRoles = isStringArray(parsed.actualRoles)
+          ? parsed.actualRoles
+          : isStringArray(parsed.actual)
+            ? parsed.actual
+            : undefined;
       } catch (e) {
         // Fallback
       }
     }
 
-    const auditPayload: any = {
+    const auditPayload: AuditEvent = {
       type: auditEventType,
       statusCode,
       canonicalCode,
       path,
-      reason: reason,
+      reason,
     };
 
     if (requiredRoles !== undefined) {
