@@ -1,5 +1,5 @@
 import type { HttpResponse, WebApiClient } from './web-api-client';
-import { resolveAuthCanonicalErrorKind } from '../../../../packages/shared-utils/src/transport/errors/auth-canonical-errors';
+import { resolveAuthCanonicalErrorKind } from '@/auth/auth-canonical-errors';
 
 type WebAuthUiStatus = 'idle' | 'error';
 
