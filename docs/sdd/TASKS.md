@@ -104,12 +104,16 @@ Nota: la implementación debe enlazar evidencia de pruebas por feature contra lo
 - [x] **Fase 9 — Slice e2e full flow UI→API→respuesta visible (TDD):** RED e2e full-stack en `src/apps/web/` validando navegación/acción UI, llamada a API protegida con `X-API-Key` y rendering de respuesta/estado visible para usuario final, GREEN implementación mínima para pasar, REFACTOR de estabilidad y datos de prueba.
 
 ### DoD
-- [ ] Cumple criterios de issue #1.
-- [ ] Coverage y CI en verde.
-- [ ] Evidencia de demo web funcional del flujo auth (público/protegido + manejo `401/403`) disponible en PR.
-- [ ] E2E de punta a punta (UI→API→respuesta visible) en verde y enlazado como evidencia.
-- [ ] No viola la estructura monorepo objetivo; cualquier excepción de ubicación/arquitectura tiene autorización explícita del usuario previa a la implementación, con razones técnicas y trade-offs documentados.
-- [ ] PR enlazado y aprobado.
+- [x] Cumple criterios de issue #1 a nivel técnico local (tasks Fase 1..9 completas + suites auth en verde).
+- [ ] Coverage y CI en verde (**pendiente**: no existe evidencia de pipeline CI/coverage publicada en este cierre documental).
+- [ ] Evidencia de demo web funcional del flujo auth (público/protegido + manejo `401/403`) disponible en PR (**pendiente**: requiere PR con demo enlazada).
+- [x] E2E de punta a punta (UI→API→respuesta visible) en verde y enlazado como evidencia local (`src/apps/web/tests/e2e/auth-flow-ui.e2e.spec.ts`, `src/packages/backend/tests/e2e/auth-contract.e2e.spec.ts`).
+- [x] No viola la estructura monorepo objetivo; sin excepciones arquitectónicas documentadas para Issue #1.
+- [ ] PR enlazado y aprobado (**pendiente**).
+
+Evidencia factual de este cierre documental:
+- `src/packages/backend`: `npm run test` => 27/27 en verde, `npx tsc --noEmit` en verde.
+- `src/apps/web`: `npm run test` => 10/10 en verde, `npx tsc --noEmit` en verde.
 
 ---
 
