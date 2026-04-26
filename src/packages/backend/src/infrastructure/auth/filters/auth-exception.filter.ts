@@ -42,17 +42,32 @@ export class AuthExceptionFilter implements ExceptionFilter {
     const path = request.url ?? '';
     const { statusCode, canonicalCode, auditEventType } =
       resolveAuthExceptionDescriptor(exception);
-    const message = exception.message;
+    let reason = exception.message;
+    let requiredRoles: string[] | undefined;
+    let actualRoles: string[] | undefined;
+
+    if (exception instanceof ForbiddenException && exception.message.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(exception.message);
+        reason = parsed.message;
+        requiredRoles = parsed.required;
+        actualRoles = parsed.actual;
+      } catch (e) {
+        // Fallback
+      }
+    }
 
     await this.auditEventPort.record({
       type: auditEventType,
       statusCode,
       canonicalCode,
       path,
-      reason: message,
+      reason: reason,
+      requiredRoles,
+      actualRoles,
     });
 
-    const payload = buildAuthErrorResponsePayload(statusCode, canonicalCode, message, path);
+    const payload = buildAuthErrorResponsePayload(statusCode, canonicalCode, reason, path);
 
     const withStatus = response.status?.(statusCode) ?? response.code?.(statusCode);
 

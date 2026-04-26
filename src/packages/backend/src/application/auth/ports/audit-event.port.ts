@@ -6,6 +6,8 @@ export interface AuditEvent {
   canonicalCode: 'AUTH_UNAUTHENTICATED' | 'AUTH_FORBIDDEN';
   path: string;
   reason: string;
+  requiredRoles?: string[];
+  actualRoles?: string[];
 }
 
 export interface AuditEventPort {
