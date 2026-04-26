@@ -96,4 +96,28 @@ describe('AuthExceptionFilter', () => {
       reason: 'Insufficient role permissions',
     });
   });
+
+  it('should include requiredRoles and actualRoles in authz audit payload when ForbiddenException includes role details', async () => {
+    const exception = new ForbiddenException(
+      JSON.stringify({
+        message: 'Insufficient role permissions',
+        requiredRoles: ['admin', 'cajero'],
+        actualRoles: ['mozo'],
+      }),
+    );
+    const host = buildArgumentsHost(response, '/api/v1/admin/users');
+
+    await filter.catch(exception, host);
+
+    expect(response.status).toHaveBeenCalledWith(403);
+    expect(auditEventPortMock.record).toHaveBeenCalledWith({
+      type: 'AUTHZ_DENIED',
+      statusCode: 403,
+      canonicalCode: 'AUTH_FORBIDDEN',
+      path: '/api/v1/admin/users',
+      reason: 'Insufficient role permissions',
+      requiredRoles: ['admin', 'cajero'],
+      actualRoles: ['mozo'],
+    });
+  });
 });
