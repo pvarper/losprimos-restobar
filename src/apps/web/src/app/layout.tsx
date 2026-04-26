@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import './globals.css';
 
@@ -12,7 +12,7 @@ interface RootLayoutProps {
   readonly children: ReactNode;
 }
 
-const RootLayout = ({ children }: RootLayoutProps): JSX.Element => (
+const RootLayout = ({ children }: RootLayoutProps): ReactElement => (
   <html lang="es">
     <body>{children}</body>
   </html>

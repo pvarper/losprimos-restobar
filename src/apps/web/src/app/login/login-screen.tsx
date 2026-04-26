@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, type FormEvent } from 'react';
+import { useState, useTransition, type FormEvent, type ReactElement } from 'react';
 
 import type {
   WebAuthExperience,
@@ -20,7 +20,7 @@ interface LoginScreenProps {
   readonly protectedUrl: string;
 }
 
-export const LoginScreen = ({ experience, protectedUrl }: LoginScreenProps): JSX.Element => {
+export const LoginScreen = ({ experience, protectedUrl }: LoginScreenProps): ReactElement => {
   const [apiKey, setApiKey] = useState<string>('');
   const [visibleState, setVisibleState] =
     useState<WebAuthExperienceVisibleState>(EMPTY_VISIBLE_STATE);
