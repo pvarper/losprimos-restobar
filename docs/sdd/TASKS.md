@@ -93,23 +93,27 @@ Nota: la implementación debe enlazar evidencia de pruebas por feature contra lo
 - Fuera de alcance: JWT/OAuth/refresh token para cliente FE.
 
 ### Tasks
-- [ ] **Fase 1 — Slice API Key (TDD):** RED `src/packages/backend/tests/unit/**/api-key-auth.guard.spec.ts` (falta/inválida/inactiva => 401, sin Bearer/JWT), GREEN `api-key-auth.guard.ts` + contrato de validación, REFACTOR de mapeo de contexto autenticado.
-- [ ] **Fase 2 — Slice sesión interna (TDD):** RED `src/packages/backend/tests/unit/**/resolve-session.use-case.spec.ts` (crear/expirar/revocar), GREEN `internal-session.entity.ts` + `session-repository.port.ts` + `session-repository.adapter.ts` + `resolve-session.use-case.ts`, REFACTOR de TTL/reloj y nomenclatura.
-- [ ] **Fase 3 — Slice RBAC multirol (TDD):** RED `src/packages/backend/tests/unit/**/rbac.guard.spec.ts` (deny-by-default, `@Public()`, intersección de roles), GREEN `public.decorator.ts` + `roles.decorator.ts` + `rbac.guard.ts`, REFACTOR helper de metadata/roles requeridos.
-- [ ] **Fase 4 — Slice errores/auditoría (TDD):** RED `src/packages/backend/tests/unit/**/auth-exception.filter.spec.ts` + tests de auditoría separada 401/403, GREEN `auth-exception.filter.ts` + `audit-event.port.ts` + adapter inicial, REFACTOR de códigos canónicos y payload de error.
-- [ ] **Fase 5 — Slice integración de módulo (TDD):** RED tests de integración Nest (`identity-access.module.int.spec.ts`) para matriz 401/403 y sesión vigente/expirada/revocada, GREEN wiring global de guards/filtro en `AppModule`/`main.ts`, REFACTOR de providers/tokens DI en `IdentityAccessModule`.
-- [ ] **Fase 6 — Slice contrato/documentación (TDD):** RED e2e (`auth-contract.e2e.spec.ts`) validando endpoints públicos/protegidos y ausencia de token en respuesta, GREEN actualización de `backend-openapi.yaml` + `auth-and-consumption.md`, REFACTOR de ejemplos/terminología API Key-only.
-- [ ] **Fase 7 — Slice web auth (TDD):** RED tests web del flujo de autenticación por API Key (ingreso/configuración de credencial de consumo y guardado en estado de sesión de la app), GREEN implementación de pantalla/flujo en `src/apps/web/` para consumir endpoints públicos/protegidos, REFACTOR de estados/mensajes UX.
-- [ ] **Fase 8 — Slice web manejo de errores canónicos (TDD):** RED tests web para respuestas `401/403` desde endpoints protegidos, GREEN manejo explícito en UI (mensaje visible + acción de recuperación/reintento según caso), REFACTOR de mapeo de errores FE↔BE.
-- [ ] **Fase 9 — Slice e2e full flow UI→API→respuesta visible (TDD):** RED e2e full-stack en `src/apps/web/` validando navegación/acción UI, llamada a API protegida con `X-API-Key` y rendering de respuesta/estado visible para usuario final, GREEN implementación mínima para pasar, REFACTOR de estabilidad y datos de prueba.
+- [x] **Fase 1 — Slice API Key (TDD):** RED `src/packages/backend/tests/unit/**/api-key-auth.guard.spec.ts` (falta/inválida/inactiva => 401, sin Bearer/JWT), GREEN `api-key-auth.guard.ts` + contrato de validación, REFACTOR de mapeo de contexto autenticado.
+- [x] **Fase 2 — Slice sesión interna (TDD):** RED `src/packages/backend/tests/unit/**/resolve-session.use-case.spec.ts` (crear/expirar/revocar), GREEN `internal-session.entity.ts` + `session-repository.port.ts` + `session-repository.adapter.ts` + `resolve-session.use-case.ts`, REFACTOR de TTL/reloj y nomenclatura.
+- [x] **Fase 3 — Slice RBAC multirol (TDD):** RED `src/packages/backend/tests/unit/**/rbac.guard.spec.ts` (deny-by-default, `@Public()`, intersección de roles), GREEN `public.decorator.ts` + `roles.decorator.ts` + `rbac.guard.ts`, REFACTOR helper de metadata/roles requeridos.
+- [x] **Fase 4 — Slice errores/auditoría (TDD):** RED `src/packages/backend/tests/unit/**/auth-exception.filter.spec.ts` + tests de auditoría separada 401/403, GREEN `auth-exception.filter.ts` + `audit-event.port.ts` + adapter inicial, REFACTOR de códigos canónicos y payload de error.
+- [x] **Fase 5 — Slice integración de módulo (TDD):** RED tests de integración Nest (`identity-access.module.int.spec.ts`) para matriz 401/403 y sesión vigente/expirada/revocada, GREEN wiring global de guards/filtro en `AppModule`/`main.ts`, REFACTOR de providers/tokens DI en `IdentityAccessModule`.
+- [x] **Fase 6 — Slice contrato/documentación (TDD):** RED e2e (`auth-contract.e2e.spec.ts`) validando endpoints públicos/protegidos y ausencia de token en respuesta, GREEN actualización de `backend-openapi.yaml` + `auth-and-consumption.md`, REFACTOR de ejemplos/terminología API Key-only.
+- [x] **Fase 7 — Slice web auth (TDD):** RED tests web del flujo de autenticación por API Key (ingreso/configuración de credencial de consumo y guardado en estado de sesión de la app), GREEN implementación de pantalla/flujo en `src/apps/web/` para consumir endpoints públicos/protegidos, REFACTOR de estados/mensajes UX.
+- [x] **Fase 8 — Slice web manejo de errores canónicos (TDD):** RED tests web para respuestas `401/403` desde endpoints protegidos, GREEN manejo explícito en UI (mensaje visible + acción de recuperación/reintento según caso), REFACTOR de mapeo de errores FE↔BE.
+- [x] **Fase 9 — Slice e2e full flow UI→API→respuesta visible (TDD):** RED e2e full-stack en `src/apps/web/` validando navegación/acción UI, llamada a API protegida con `X-API-Key` y rendering de respuesta/estado visible para usuario final, GREEN implementación mínima para pasar, REFACTOR de estabilidad y datos de prueba.
 
 ### DoD
-- [ ] Cumple criterios de issue #1.
-- [ ] Coverage y CI en verde.
-- [ ] Evidencia de demo web funcional del flujo auth (público/protegido + manejo `401/403`) disponible en PR.
-- [ ] E2E de punta a punta (UI→API→respuesta visible) en verde y enlazado como evidencia.
-- [ ] No viola la estructura monorepo objetivo; cualquier excepción de ubicación/arquitectura tiene autorización explícita del usuario previa a la implementación, con razones técnicas y trade-offs documentados.
-- [ ] PR enlazado y aprobado.
+- [x] Cumple criterios de issue #1 a nivel técnico local (tasks Fase 1..9 completas + suites auth en verde).
+- [ ] Coverage y CI en verde (**pendiente**: no existe evidencia de pipeline CI/coverage publicada en este cierre documental).
+- [ ] Evidencia de demo web funcional del flujo auth (público/protegido + manejo `401/403`) disponible en PR (**pendiente**: requiere PR con demo enlazada).
+- [x] E2E de punta a punta (UI→API→respuesta visible) en verde y enlazado como evidencia local (`src/apps/web/tests/e2e/auth-flow-ui.e2e.spec.ts`, `src/packages/backend/tests/e2e/auth-contract.e2e.spec.ts`).
+- [x] No viola la estructura monorepo objetivo; sin excepciones arquitectónicas documentadas para Issue #1.
+- [ ] PR enlazado y aprobado (**pendiente**).
+
+Evidencia factual de este cierre documental:
+- `src/packages/backend`: `npm run test` => 27/27 en verde, `npx tsc --noEmit` en verde.
+- `src/apps/web`: `npm run test` => 10/10 en verde, `npx tsc --noEmit` en verde.
 
 ---
 
@@ -262,3 +266,11 @@ Nota: la implementación debe enlazar evidencia de pruebas por feature contra lo
 - [ ] Rama creada para el feature.
 
 **Regla inquebrantable:** no iniciar ni continuar con otro feature sin autorización explícita del usuario.
+
+---
+
+## 7. TDD Cycle Evidence — Correctivos sdd-verify (Issue #1)
+
+| Fecha | Task/Corrección | Test File | Layer | Safety Net | RED | GREEN | REFACTOR | Evidencia |
+|---|---|---|---|---|---|---|---|---|
+| 2026-04-25 | `AuthExceptionFilter` debe auditar `requiredRoles`/`actualRoles` para `ForbiddenException` | `src/packages/backend/tests/unit/infrastructure/auth/filters/auth-exception.filter.spec.ts` | Unit | ✅ `npm run test -- tests/unit/infrastructure/auth/filters/auth-exception.filter.spec.ts` (2/2) | ✅ Nuevo test con payload JSON (`requiredRoles`, `actualRoles`) fallando (1/3) | ✅ Ajuste de parser + tipado fuerte (`AuditEvent`) y tests 3/3 en verde | ➖ Sin refactor adicional | Commits: `a716f29` (RED), `962ffec` (GREEN) |

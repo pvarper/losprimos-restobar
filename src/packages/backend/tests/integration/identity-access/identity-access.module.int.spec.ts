@@ -1,0 +1,96 @@
+import { NestFastifyApplication, FastifyAdapter } from '@nestjs/platform-fastify';
+import { Test, TestingModule } from '@nestjs/testing';
+import { describe, beforeEach, afterEach, expect, it } from 'vitest';
+import { AppModule } from '../../../src/app.module';
+import { configureApp } from '../../../src/main';
+
+describe('IdentityAccess module integration (global wiring)', () => {
+  let app: NestFastifyApplication;
+
+  beforeEach(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = moduleFixture.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+    configureApp(app);
+    await app.init();
+    await app.getHttpAdapter().getInstance().ready();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('responde 401 cuando falta API Key (matriz authn)', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/identity-access/protected/admin-cajero',
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toMatchObject({
+      code: 'AUTH_UNAUTHENTICATED',
+    });
+  });
+
+  it('responde 200 cuando API Key es válida y tiene intersección de roles requeridos', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/identity-access/protected/admin-cajero',
+      headers: {
+        'x-api-key': 'admin-only-key',
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      status: 'ok',
+    });
+  });
+
+  it('responde 200 con API Key válida + sesión vigente + roles requeridos', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/identity-access/protected/admin-cajero',
+      headers: {
+        'x-api-key': 'admin-cajero-key',
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      status: 'ok',
+    });
+  });
+
+  it('responde 401 cuando la sesión interna está expirada', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/identity-access/protected/admin-cajero',
+      headers: {
+        'x-api-key': 'admin-cajero-expired-session-key',
+      },
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toMatchObject({
+      code: 'AUTH_UNAUTHENTICATED',
+    });
+  });
+
+  it('responde 401 cuando la sesión interna está revocada', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/identity-access/protected/admin-cajero',
+      headers: {
+        'x-api-key': 'admin-cajero-revoked-session-key',
+      },
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toMatchObject({
+      code: 'AUTH_UNAUTHENTICATED',
+    });
+  });
+});

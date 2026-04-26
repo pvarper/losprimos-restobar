@@ -85,11 +85,17 @@ Referencias:
 - `docs/technicals-requirements/architecture.md`
 - `docs/sdd/DESIGN.md`
 
-## 6) Contrato FE↔BE vigente
+## 6) Contrato FE↔BE y Stack Tecnológico
 
-- Comunicación: API REST
-- Backend runtime objetivo: NestJS + Fastify
-- Autenticación FE↔BE: `X-API-Key`
+- Comunicación FE↔BE: API REST
+- Backend runtime objetivo: Node.js + TypeScript + NestJS + Fastify
+- Persistencia objetivo: PostgreSQL + Prisma ORM
+- Frontend framework objetivo: Next.js + React (App Router)
+- Tiempo real (cuando aplique): WebSockets con Socket.IO
+- Cache/Colas (cuando aplique): Redis
+- Contenedores locales: Docker + Docker Compose
+- CI/CD: GitHub Actions
+- Autenticación FE↔BE: `X-API-Key` (sin JWT para clientes web MVP)
 - Errores canónicos: 401/403/409/422 con code semántico
 
 Referencias:
