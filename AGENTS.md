@@ -89,6 +89,7 @@ Referencias:
 
 - Comunicación: API REST
 - Backend runtime objetivo: NestJS + Fastify
+- Frontend framework objetivo: Next.js + React (App Router)
 - Autenticación FE↔BE: `X-API-Key`
 - Errores canónicos: 401/403/409/422 con code semántico
 
