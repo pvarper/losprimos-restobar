@@ -57,15 +57,23 @@ export class AuthExceptionFilter implements ExceptionFilter {
       }
     }
 
-    await this.auditEventPort.record({
+    const auditPayload: any = {
       type: auditEventType,
       statusCode,
       canonicalCode,
       path,
       reason: reason,
-      requiredRoles,
-      actualRoles,
-    });
+    };
+
+    if (requiredRoles !== undefined) {
+      auditPayload.requiredRoles = requiredRoles;
+    }
+    
+    if (actualRoles !== undefined) {
+      auditPayload.actualRoles = actualRoles;
+    }
+
+    await this.auditEventPort.record(auditPayload);
 
     const payload = buildAuthErrorResponsePayload(statusCode, canonicalCode, reason, path);
 
