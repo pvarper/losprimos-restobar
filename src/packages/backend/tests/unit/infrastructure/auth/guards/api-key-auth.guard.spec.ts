@@ -108,16 +108,20 @@ describe('ApiKeyAuthGuard', () => {
       clientId: 'internal-app',
       roles: ['admin'],
       status: 'active',
+      internalSessionId: 'session-test',
     };
     validateApiKeyPortMock.validate.mockResolvedValue(mockPayload);
 
     const result = await guard.canActivate(context);
 
     expect(result).toBe(true);
-    expect(mockRequest.user).toEqual({
-      authMethod: 'api-key',
-      clientId: 'internal-app',
-      roles: ['admin'],
-    });
+    expect(mockRequest.user).toEqual(
+      expect.objectContaining({
+        authMethod: 'api-key',
+        clientId: 'internal-app',
+        roles: ['admin'],
+        internalSessionId: 'session-test',
+      })
+    );
   });
 });

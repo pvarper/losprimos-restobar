@@ -10,8 +10,9 @@ import { ResolveSessionUseCase } from '../../../identity-access/application/use-
 import { PUBLIC_ROUTE_KEY } from '../decorators/public.decorator';
 import { IDENTITY_ACCESS_TOKENS } from '../../../identity-access/identity-access.tokens';
 
-type RequestWithHeaders = {
+type RequestWithHeadersAndUser = {
   headers: Record<string, string | string[] | undefined>;
+  user?: { internalSessionId?: string; [key: string]: unknown };
 };
 
 @Injectable()
@@ -33,16 +34,18 @@ export class InternalSessionGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<RequestWithHeaders>();
-    const sessionHeader = request.headers['x-session-id'];
+    const request = context.switchToHttp().getRequest<RequestWithHeadersAndUser>();
+    
+    // Sesión no se lee del cliente web, sino del payload validado por ApiKey
+    const internalSessionId = request.user?.internalSessionId;
 
-    if (typeof sessionHeader !== 'string' || sessionHeader.trim().length === 0) {
-      throw new UnauthorizedException('Missing internal session');
+    if (typeof internalSessionId !== 'string' || internalSessionId.trim().length === 0) {
+      throw new UnauthorizedException('Missing internal session ID in context');
     }
 
     const session = await this.resolveSessionUseCase.execute({
       action: 'resolve',
-      sessionId: sessionHeader.trim(),
+      sessionId: internalSessionId.trim(),
     });
 
     if (!session) {

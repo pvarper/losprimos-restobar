@@ -1,6 +1,7 @@
 export interface ApiKeyPayload {
   clientId: string;
   roles: string[];
+  internalSessionId?: string;
 }
 
 export interface ActiveApiKeyPayload extends ApiKeyPayload {

@@ -26,9 +26,6 @@ describe('IdentityAccess module integration (global wiring)', () => {
     const response = await app.inject({
       method: 'GET',
       url: '/identity-access/protected/admin-cajero',
-      headers: {
-        'x-session-id': 'session-vigente',
-      },
     });
 
     expect(response.statusCode).toBe(401);
@@ -43,7 +40,6 @@ describe('IdentityAccess module integration (global wiring)', () => {
       url: '/identity-access/protected/admin-cajero',
       headers: {
         'x-api-key': 'admin-only-key',
-        'x-session-id': 'session-vigente',
       },
     });
 
@@ -59,7 +55,6 @@ describe('IdentityAccess module integration (global wiring)', () => {
       url: '/identity-access/protected/admin-cajero',
       headers: {
         'x-api-key': 'admin-cajero-key',
-        'x-session-id': 'session-vigente',
       },
     });
 
@@ -74,8 +69,7 @@ describe('IdentityAccess module integration (global wiring)', () => {
       method: 'GET',
       url: '/identity-access/protected/admin-cajero',
       headers: {
-        'x-api-key': 'admin-cajero-key',
-        'x-session-id': 'session-expirada',
+        'x-api-key': 'admin-cajero-expired-session-key',
       },
     });
 
@@ -90,8 +84,7 @@ describe('IdentityAccess module integration (global wiring)', () => {
       method: 'GET',
       url: '/identity-access/protected/admin-cajero',
       headers: {
-        'x-api-key': 'admin-cajero-key',
-        'x-session-id': 'session-revocada',
+        'x-api-key': 'admin-cajero-revoked-session-key',
       },
     });
 

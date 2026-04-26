@@ -38,9 +38,6 @@ describe('Auth contract e2e (API Key-only)', () => {
     const response = await app.inject({
       method: 'GET',
       url: '/auth/me',
-      headers: {
-        'x-session-id': 'session-vigente',
-      },
     });
 
     expect(response.statusCode).toBe(401);
@@ -55,7 +52,6 @@ describe('Auth contract e2e (API Key-only)', () => {
       url: '/auth/me',
       headers: {
         'x-api-key': 'admin-cajero-key',
-        'x-session-id': 'session-vigente',
       },
     });
     const body = response.json() as Record<string, unknown>;
