@@ -262,3 +262,11 @@ Nota: la implementación debe enlazar evidencia de pruebas por feature contra lo
 - [ ] Rama creada para el feature.
 
 **Regla inquebrantable:** no iniciar ni continuar con otro feature sin autorización explícita del usuario.
+
+---
+
+## 7. TDD Cycle Evidence — Correctivos sdd-verify (Issue #1)
+
+| Fecha | Task/Corrección | Test File | Layer | Safety Net | RED | GREEN | REFACTOR | Evidencia |
+|---|---|---|---|---|---|---|---|---|
+| 2026-04-25 | `AuthExceptionFilter` debe auditar `requiredRoles`/`actualRoles` para `ForbiddenException` | `src/packages/backend/tests/unit/infrastructure/auth/filters/auth-exception.filter.spec.ts` | Unit | ✅ `npm run test -- tests/unit/infrastructure/auth/filters/auth-exception.filter.spec.ts` (2/2) | ✅ Nuevo test con payload JSON (`requiredRoles`, `actualRoles`) fallando (1/3) | ✅ Ajuste de parser + tipado fuerte (`AuditEvent`) y tests 3/3 en verde | ➖ Sin refactor adicional | Commits: `a716f29` (RED), `962ffec` (GREEN) |
